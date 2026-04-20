@@ -103,15 +103,213 @@ git add .
 git commit -m "Initial commit - EduForge AI complete project"
 
 # Add your GitHub repo
+
 git remote add origin https://github.com/YOUR-USERNAME/eduforge-ai.git
 
 # Push to GitHub
+git init
+git add .
+git commit -m "Initial commit - EduForge AI - Complete AI Assessment Platform"
+
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/eduforge-ai.git
+git push -u origin main
 git branch -M main
 git push -u origin main
 
 Final Checklist Before Pushing
 
+
+
+#!/bin/bash
+# =============================================
+#  One-Click Run Script (Mac/Linux)
+# =============================================
+
+echo "🚀 Starting EduForge AI..."
+
+# Activate virtual environment
+if [ -d "venv" ]; then
+    echo "✅ Activating virtual environment..."
+    source venv/bin/activate
+else
+    echo "❌ Virtual environment not found! Run: python -m venv venv"
+    exit 1
+fi
+
+# Check for .env file
+if [ ! -f ".env" ]; then
+    echo "❌ .env file not found! Please create it first."
+    exit 1
+fi
+
+echo "🔄 Running database migrations..."
+alembic upgrade head
+
+echo ""
+echo "Choose how you want to run the project:"
+echo "1. Docker (Recommended - Easiest)"
+echo "2. Local (Manual - Celery + FastAPI)"
+echo "3. Exit"
+read -p "Enter your choice (1/2/3): " choice
+
+case $choice in
+    1)
+        echo "🐳 Starting with Docker..."
+        docker-compose up --build
+        ;;
+    2)
+        echo "⚡ Starting Celery Worker in background..."
+        celery -A app.workers.celery_work worker --loglevel=info &
+        CELERY_PID=$!
+        
+        echo "🌐 Starting FastAPI Server..."
+        echo "📍 API will be available at http://localhost:8000/docs"
+        uvicorn app.main:app --reload --port 8000
+        
+        # Kill Celery when server stops
+        kill $CELERY_PID
+        ;;
+    3)
+        echo "👋 Exiting..."
+        exit 0
+        ;;
+    *)
+        echo "❌ Invalid choice!"
+        ;;
+esac
+
 .env file should NOT be committed (it is already in .gitignore)
 All folders have __init__.py
 You have tested the app once (docker-compose up or local run)
-OpenAI key is in .env (not in code)
+OpenAI key is in .env (not in code) 
+
+
+@echo off
+:: =============================================
+:: One-Click Run Script (Windows)
+:: =============================================
+
+echo.
+echo 🚀 Starting EduForge AI...
+echo.
+
+:: Activate virtual environment
+if exist venv\Scripts\activate.bat (
+    echo ✅ Activating virtual environment...
+    call venv\Scripts\activate.bat
+) else (
+    echo ❌ Virtual environment not found! Run: python -m venv venv
+    pause
+    exit /b
+)
+
+:: Check for .env file
+if not exist .env (
+    echo ❌ .env file not found! Please create it first.
+    pause
+    exit /b
+)
+
+echo 🔄 Running database migrations...
+alembic upgrade head
+
+echo.
+echo Choose how you want to run the project:
+echo 1. Docker (Recommended - Easiest)
+echo 2. Local (Manual - Celery + FastAPI)
+echo 3. Exit
+set /p choice="Enter your choice (1/2/3): "
+
+if %choice%==1 (
+    echo 🐳 Starting with Docker...
+    docker-compose up --build
+) else if %choice%==2 (
+    echo ⚡ Starting Celery Worker...
+    start cmd /k "celery -A app.workers.celery_work worker --loglevel=info"
+    
+    echo 🌐 Starting FastAPI Server...
+    echo 📍 API will be available at http://localhost:8000/docs
+    uvicorn app.main:app --reload --port 8000
+) else if %choice%==3 (
+    echo 👋 Exiting...
+) else (
+    echo ❌ Invalid choice!
+)
+
+pause
+
+How to Use These Files
+
+Copy the run.sh content and save it as run.sh in your project root.
+Copy the run.bat content and save it as run.bat in your project root.
+Make run.sh executable (Mac/Linux only):
+
+Bashchmod +x run.sh
+
+Run the script:
+
+
+Mac/Linux: ./run.sh
+Windows: Double-click run.bat or run it in Command Prompt. 
+
+
+#!/bin/bash
+# =============================================
+# EduForge AI - One-Click Run Script (Mac/Linux)
+# =============================================
+
+echo "🚀 EduForge AI - One Click Launcher"
+
+# Activate virtual environment
+if [ -d "venv" ]; then
+    source venv/bin/activate
+else
+    echo "❌ Virtual environment not found! Run: python -m venv venv"
+    exit 1
+fi
+
+# Check .env file
+if [ ! -f ".env" ]; then
+    echo "❌ .env file not found! Please create it first."
+    exit 1
+fi
+
+echo "🔄 Running database migrations..."
+alembic upgrade head
+
+echo ""
+echo "Select Run Mode:"
+echo "1. Docker Mode (Recommended)"
+echo "2. Development Mode (Celery + FastAPI in separate windows)"
+echo "3. Local Server Only"
+echo "4. Exit"
+read -p "Enter your choice (1-4): " choice
+
+case $choice in
+    1)
+        echo "🐳 Starting with Docker Compose..."
+        docker-compose up --build
+        ;;
+    2)
+        echo "⚡ Starting Development Mode..."
+        echo "Starting Celery Worker in new terminal..."
+        osascript -e 'tell app "Terminal" to do script "cd '"$PWD"' && source venv/bin/activate && celery -A app.workers.celery_work worker --loglevel=info"' &
+        
+        sleep 3
+        echo "🌐 Starting FastAPI Server..."
+        echo "📍 Server will be live at http://localhost:8000/docs"
+        uvicorn app.main:app --reload --port 8000
+        ;;
+    3)
+        echo "🌐 Starting FastAPI Server Only..."
+        uvicorn app.main:app --reload --port 8000
+        ;;
+    4)
+        echo "👋 Exiting..."
+        exit 0
+        ;;
+    *)
+        echo "❌ Invalid option!"
+        ;;
+esac
